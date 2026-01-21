@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Talk with Pucha - チャット</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="toolbar">
+    <h1>Talk with Pucha</h1>
+    <div class="toolbar-actions">
+      <button id="lockToggle" type="button">ロック/ぼかし</button>
+      <button id="panicClear" type="button">緊急クリア</button>
+      <button id="lockSession" type="button">セッションロック</button>
+    </div>
+  </header>
+
+  <main class="chat-layout">
+    <section id="messages" class="messages"></section>
+    <section class="composer">
+      <textarea id="input" rows="4" placeholder="メッセージを入力..."></textarea>
+      <div class="composer-actions">
+        <button id="send" type="button">送信</button>
+        <span id="status" class="muted"></span>
+      </div>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>
