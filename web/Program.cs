@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -10,6 +11,7 @@ builder.Services.AddSingleton(new HttpClient());
 var app = builder.Build();
 
 var appPin = GetRequiredEnv("APP_PIN");
+var appName = GetRequiredEnv("APP_NAME");
 var freeDailyLimit = GetRequiredIntEnv("FREE_DAILY_LIMIT");
 var cooldownSeconds = GetRequiredIntEnv("COOLDOWN_SECONDS");
 var maxInputChars = GetRequiredIntEnv("MAX_INPUT_CHARS");
@@ -27,7 +29,8 @@ app.UseStaticFiles();
 
 app.MapGet("/", () => Results.Redirect("/login"));
 
-app.MapGet("/login", () => Results.File(Path.Combine(app.Environment.WebRootPath, "login.html"), "text/html"));
+app.MapGet("/login", () =>
+    Results.Text(RenderHtmlTemplate(app.Environment.WebRootPath, "login.html", appName), "text/html"));
 
 app.MapPost("/login", async (HttpRequest request, HttpResponse response) =>
 {
@@ -73,7 +76,7 @@ app.MapGet("/chat", (HttpRequest request) =>
         return Results.Redirect("/login");
     }
 
-    return Results.File(Path.Combine(app.Environment.WebRootPath, "chat.html"), "text/html");
+    return Results.Text(RenderHtmlTemplate(app.Environment.WebRootPath, "chat.html", appName), "text/html");
 });
 
 app.MapPost("/api/chat", async (HttpRequest request, HttpResponse response, HttpClient httpClient) =>
@@ -263,6 +266,14 @@ static int GetRequiredIntEnv(string name)
     }
 
     return parsed;
+}
+
+static string RenderHtmlTemplate(string webRootPath, string fileName, string appName)
+{
+    var path = Path.Combine(webRootPath, fileName);
+    var template = File.ReadAllText(path);
+    var safeAppName = WebUtility.HtmlEncode(appName);
+    return template.Replace("{{APP_NAME}}", safeAppName, StringComparison.Ordinal);
 }
 
 record ChatRequest([property: JsonPropertyName("input")] string Input);
