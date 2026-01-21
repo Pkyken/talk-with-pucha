@@ -88,56 +88,6 @@ const sendMessage = async () => {
 
 sendBtn.addEventListener('click', sendMessage);
 
-const resetImeState = () => {
-  isComposing = false;
-  suppressEnterOnce = false;
-};
-
-inputEl.addEventListener('compositionstart', () => {
-  isComposing = true;
-  suppressEnterOnce = true;
-});
-
-inputEl.addEventListener('compositionupdate', () => {
-  suppressEnterOnce = true;
-});
-
-inputEl.addEventListener('compositionend', () => {
-  isComposing = false;
-  suppressEnterOnce = true;
-});
-
-inputEl.addEventListener('compositioncancel', resetImeState);
-inputEl.addEventListener('blur', resetImeState);
-
-inputEl.addEventListener('beforeinput', (event) => {
-  if (event && event.isComposing) {
-    suppressEnterOnce = true;
-  }
-});
-
-inputEl.addEventListener(
-  'keydown',
-  (event) => {
-    if (event.key !== 'Enter' || event.shiftKey) {
-      return;
-    }
-
-    const imeHint = isComposing || event.isComposing || event.keyCode === 229;
-    if (imeHint || suppressEnterOnce) {
-      suppressEnterOnce = false;
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      return;
-    }
-
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    sendMessage();
-  },
-  true
-);
-
 lockToggle.addEventListener('click', () => {
   messagesEl.classList.toggle('blurred');
 });
