@@ -5,6 +5,8 @@ const statusEl = document.getElementById('status');
 const lockToggle = document.getElementById('lockToggle');
 const panicClear = document.getElementById('panicClear');
 const lockSession = document.getElementById('lockSession');
+let isComposing = false;
+let lastCompositionEndAt = 0;
 
 const errorMessages = {
   unauthorized: '認証が必要です。',
@@ -41,7 +43,13 @@ const resolveErrorMessage = (codeOrMessage, status) => {
   return errorMessages[codeOrMessage] || codeOrMessage || '不明なエラーです。';
 };
 
+const shouldBlockSend = () =>
+  isComposing || performance.now() - lastCompositionEndAt < 50;
+
 const sendMessage = async () => {
+  if (shouldBlockSend()) {
+    return;
+  }
   const text = inputEl.value.trim();
   if (!text) {
     return;
@@ -79,16 +87,16 @@ const sendMessage = async () => {
 };
 
 sendBtn.addEventListener('click', sendMessage);
-let isComposing = false;
 inputEl.addEventListener('compositionstart', () => {
   isComposing = true;
 });
 inputEl.addEventListener('compositionend', () => {
   isComposing = false;
+  lastCompositionEndAt = performance.now();
 });
 inputEl.addEventListener('keydown', (event) => {
   if (event.key === 'Enter' && !event.shiftKey) {
-    if (isComposing || event.isComposing || event.keyCode === 229) {
+    if (shouldBlockSend() || event.isComposing || event.keyCode === 229) {
       return;
     }
     event.preventDefault();
