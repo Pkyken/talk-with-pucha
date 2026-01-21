@@ -79,8 +79,18 @@ const sendMessage = async () => {
 };
 
 sendBtn.addEventListener('click', sendMessage);
+let isComposing = false;
+inputEl.addEventListener('compositionstart', () => {
+  isComposing = true;
+});
+inputEl.addEventListener('compositionend', () => {
+  isComposing = false;
+});
 inputEl.addEventListener('keydown', (event) => {
   if (event.key === 'Enter' && !event.shiftKey) {
+    if (isComposing || event.isComposing || event.keyCode === 229) {
+      return;
+    }
     event.preventDefault();
     sendMessage();
   }
