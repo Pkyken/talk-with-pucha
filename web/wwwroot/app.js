@@ -5,6 +5,8 @@ const statusEl = document.getElementById('status');
 const lockToggle = document.getElementById('lockToggle');
 const panicClear = document.getElementById('panicClear');
 const lockSession = document.getElementById('lockSession');
+let isComposing = false;
+let suppressEnterOnce = false;
 
 const errorMessages = {
   unauthorized: '認証が必要です。',
@@ -41,7 +43,13 @@ const resolveErrorMessage = (codeOrMessage, status) => {
   return errorMessages[codeOrMessage] || codeOrMessage || '不明なエラーです。';
 };
 
+const shouldBlockSend = () =>
+  isComposing || performance.now() - lastCompositionEndAt < 50;
+
 const sendMessage = async () => {
+  if (shouldBlockSend()) {
+    return;
+  }
   const text = inputEl.value.trim();
   if (!text) {
     return;
