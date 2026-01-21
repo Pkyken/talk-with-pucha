@@ -1,0 +1,37 @@
+services:
+  web:
+    build:
+      context: ./web
+    container_name: talk-with-pucha-web
+    environment:
+      - TZ=${TZ}
+      - APP_PIN=${APP_PIN}
+      - FREE_DAILY_LIMIT=${FREE_DAILY_LIMIT}
+      - COOLDOWN_SECONDS=${COOLDOWN_SECONDS}
+      - MAX_INPUT_CHARS=${MAX_INPUT_CHARS}
+      - MAX_CONTEXT_MESSAGES=${MAX_CONTEXT_MESSAGES}
+      - SESSION_TTL_HOURS=${SESSION_TTL_HOURS}
+      - LLM_ADAPTER_URL=${LLM_ADAPTER_URL}
+      - ASPNETCORE_URLS=http://0.0.0.0:8080
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - llm
+    restart: unless-stopped
+
+  llm:
+    build:
+      context: ./llm
+    container_name: talk-with-pucha-llm
+    environment:
+      - TZ=${TZ}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - OPENROUTER_BASE_URL=${OPENROUTER_BASE_URL}
+      - MODEL_CANDIDATES=${MODEL_CANDIDATES}
+      - REQUEST_TIMEOUT_SEC=${REQUEST_TIMEOUT_SEC}
+      - MAX_OUTPUT_TOKENS=${MAX_OUTPUT_TOKENS}
+    expose:
+      - "8000"
+    restart: unless-stopped
