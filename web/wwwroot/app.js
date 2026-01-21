@@ -43,7 +43,13 @@ const resolveErrorMessage = (codeOrMessage, status) => {
   return errorMessages[codeOrMessage] || codeOrMessage || '不明なエラーです。';
 };
 
+const shouldBlockSend = () =>
+  isComposing || performance.now() - lastCompositionEndAt < 50;
+
 const sendMessage = async () => {
+  if (shouldBlockSend()) {
+    return;
+  }
   const text = inputEl.value.trim();
   if (!text) {
     return;
