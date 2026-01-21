@@ -5,6 +5,8 @@ const statusEl = document.getElementById('status');
 const lockToggle = document.getElementById('lockToggle');
 const panicClear = document.getElementById('panicClear');
 const lockSession = document.getElementById('lockSession');
+let composing = false;
+let suppressEnterOnce = false;
 
 const errorMessages = {
   unauthorized: '認証が必要です。',
@@ -79,22 +81,53 @@ const sendMessage = async () => {
 };
 
 sendBtn.addEventListener('click', sendMessage);
-let isComposing = false;
+
 inputEl.addEventListener('compositionstart', () => {
-  isComposing = true;
+  composing = true;
 });
+
 inputEl.addEventListener('compositionend', () => {
-  isComposing = false;
+  composing = false;
+  suppressEnterOnce = true;
 });
-inputEl.addEventListener('keydown', (event) => {
-  if (event.key === 'Enter' && !event.shiftKey) {
-    if (isComposing || event.isComposing || event.keyCode === 229) {
+
+inputEl.addEventListener('compositioncancel', () => {
+  composing = false;
+  suppressEnterOnce = false;
+});
+
+inputEl.addEventListener('blur', () => {
+  composing = false;
+  suppressEnterOnce = false;
+});
+
+inputEl.addEventListener(
+  'keydown',
+  (event) => {
+    if (event.key !== 'Enter' || event.shiftKey) {
       return;
     }
+
+    const imeHint = composing || event.isComposing || event.keyCode === 229;
+    if (imeHint) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      return;
+    }
+
+    if (suppressEnterOnce) {
+      suppressEnterOnce = false;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      return;
+    }
+
     event.preventDefault();
+    event.stopImmediatePropagation();
     sendMessage();
-  }
-});
+  },
+  true
+);
 
 lockToggle.addEventListener('click', () => {
   messagesEl.classList.toggle('blurred');
