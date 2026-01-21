@@ -18,6 +18,8 @@ var maxInputChars = GetRequiredIntEnv("MAX_INPUT_CHARS");
 var maxContextMessages = GetRequiredIntEnv("MAX_CONTEXT_MESSAGES");
 var llmAdapterUrl = GetRequiredEnv("LLM_ADAPTER_URL");
 var sessionTtlHours = GetRequiredIntEnv("SESSION_TTL_HOURS");
+var systemPromptTemplate = Environment.GetEnvironmentVariable("SYSTEM_PROMPT");
+var tzName = Environment.GetEnvironmentVariable("TZ") ?? "UTC";
 
 var sessionTtl = TimeSpan.FromHours(sessionTtlHours);
 var cooldown = TimeSpan.FromSeconds(cooldownSeconds);
@@ -130,9 +132,11 @@ app.MapPost("/api/chat", async (HttpRequest request, HttpResponse response, Http
         session.LastActiveUtc = now;
     }
 
+    var systemPrompt = BuildSystemPrompt(systemPromptTemplate, appName, tzName, DateTime.Now);
+    var llmMessages = BuildLlmMessages(contextMessages, systemPrompt);
     var llmRequest = new LlmRequest
     {
-        Messages = contextMessages,
+        Messages = llmMessages,
         MaxTokens = 600
     };
 
@@ -274,6 +278,45 @@ static string RenderHtmlTemplate(string webRootPath, string fileName, string app
     var template = File.ReadAllText(path);
     var safeAppName = WebUtility.HtmlEncode(appName);
     return template.Replace("{{APP_NAME}}", safeAppName, StringComparison.Ordinal);
+}
+
+static string? BuildSystemPrompt(string? template, string appName, string tzName, DateTime nowLocal)
+{
+    if (string.IsNullOrWhiteSpace(template))
+    {
+        return null;
+    }
+
+    var resolvedAppName = string.IsNullOrWhiteSpace(appName) ? "talk-with-pucha" : appName;
+    var resolvedTz = string.IsNullOrWhiteSpace(tzName) ? "UTC" : tzName;
+    var date = nowLocal.ToString("yyyy-MM-dd");
+
+    return template
+        .Replace("{APP_NAME}", resolvedAppName, StringComparison.Ordinal)
+        .Replace("{DATE}", date, StringComparison.Ordinal)
+        .Replace("{TZ}", resolvedTz, StringComparison.Ordinal);
+}
+
+static List<ChatMessage> BuildLlmMessages(List<ChatMessage> contextMessages, string? systemPrompt)
+{
+    if (string.IsNullOrWhiteSpace(systemPrompt))
+    {
+        return contextMessages;
+    }
+
+    var hasSystem = contextMessages.Any(message =>
+        string.Equals(message.Role, "system", StringComparison.OrdinalIgnoreCase));
+    if (hasSystem)
+    {
+        return contextMessages;
+    }
+
+    var messages = new List<ChatMessage>(contextMessages.Count + 1)
+    {
+        new("system", systemPrompt)
+    };
+    messages.AddRange(contextMessages);
+    return messages;
 }
 
 record ChatRequest([property: JsonPropertyName("input")] string Input);

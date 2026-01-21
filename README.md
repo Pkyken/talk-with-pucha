@@ -27,6 +27,7 @@ MAX_INPUT_CHARS=4000
 MAX_CONTEXT_MESSAGES=40
 SESSION_TTL_HOURS=24
 LLM_ADAPTER_URL=http://llm:8000/llm/generate
+SYSTEM_PROMPT=あなたは{APP_NAME}のビジネス用アシスタントです。\n根拠と手順を明確に、推測は避け、敬語で簡潔に回答してください。\n今日は{DATE}（{TZ}）です。
 
 # -----------------------------
 # llm (Python / FastAPI)
@@ -49,3 +50,4 @@ MAX_OUTPUT_TOKENS=600
 - 日次制限はUTC日次 (`YYYY-MM-DD`) で `data/usage.json` に記録されます。
 - 無料モデル候補 (`MODEL_CANDIDATES`) は運用者がOpenRouterのリストを見て更新してください。
 - 会話履歴はサーバーメモリのみで、再起動すると消えます。
+- `SYSTEM_PROMPT` を設定すると system メッセージがOpenRouter送信時に先頭へ追加されます。`{APP_NAME}` `{DATE}` `{TZ}` を含む場合はサーバー側で置換され、未設定または空の場合は system メッセージは追加されません。
