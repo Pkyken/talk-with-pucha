@@ -88,7 +88,11 @@ const sendMessage = async () => {
 
 sendBtn.addEventListener('click', sendMessage);
 inputEl.addEventListener('compositionstart', () => {
-  isComposing = true;
+  composing = true;
+  suppressEnterOnce = true;
+});
+inputEl.addEventListener('compositionupdate', () => {
+  suppressEnterOnce = true;
 });
 inputEl.addEventListener('compositionend', () => {
   isComposing = false;
@@ -104,10 +108,21 @@ inputEl.addEventListener('keydown', (event) => {
       event.preventDefault();
       return;
     }
+
+    const imeHint = composing || event.isComposing || event.keyCode === 229;
+    if (imeHint || suppressEnterOnce) {
+      suppressEnterOnce = false;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      return;
+    }
+
     event.preventDefault();
+    event.stopImmediatePropagation();
     sendMessage();
-  }
-});
+  },
+  true
+);
 
 lockToggle.addEventListener('click', () => {
   messagesEl.classList.toggle('blurred');
