@@ -20,6 +20,7 @@ TZ=UTC
 # web (C# / ASP.NET Core)
 # -----------------------------
 APP_PIN=123456
+APP_NAME=Talk with Pucha
 FREE_DAILY_LIMIT=1000
 COOLDOWN_SECONDS=2
 MAX_INPUT_CHARS=4000

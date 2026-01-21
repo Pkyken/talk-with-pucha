@@ -6,6 +6,7 @@ services:
     environment:
       - TZ=${TZ}
       - APP_PIN=${APP_PIN}
+      - APP_NAME=${APP_NAME}
       - FREE_DAILY_LIMIT=${FREE_DAILY_LIMIT}
       - COOLDOWN_SECONDS=${COOLDOWN_SECONDS}
       - MAX_INPUT_CHARS=${MAX_INPUT_CHARS}
