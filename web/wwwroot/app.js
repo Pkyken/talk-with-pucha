@@ -5,7 +5,7 @@ const statusEl = document.getElementById('status');
 const lockToggle = document.getElementById('lockToggle');
 const panicClear = document.getElementById('panicClear');
 const lockSession = document.getElementById('lockSession');
-let composing = false;
+let isComposing = false;
 let suppressEnterOnce = false;
 
 const errorMessages = {
@@ -88,23 +88,32 @@ const sendMessage = async () => {
 
 sendBtn.addEventListener('click', sendMessage);
 
-inputEl.addEventListener('compositionstart', () => {
-  composing = true;
-});
+const resetImeState = () => {
+  isComposing = false;
+  suppressEnterOnce = false;
+};
 
-inputEl.addEventListener('compositionend', () => {
-  composing = false;
+inputEl.addEventListener('compositionstart', () => {
+  isComposing = true;
   suppressEnterOnce = true;
 });
 
-inputEl.addEventListener('compositioncancel', () => {
-  composing = false;
-  suppressEnterOnce = false;
+inputEl.addEventListener('compositionupdate', () => {
+  suppressEnterOnce = true;
 });
 
-inputEl.addEventListener('blur', () => {
-  composing = false;
-  suppressEnterOnce = false;
+inputEl.addEventListener('compositionend', () => {
+  isComposing = false;
+  suppressEnterOnce = true;
+});
+
+inputEl.addEventListener('compositioncancel', resetImeState);
+inputEl.addEventListener('blur', resetImeState);
+
+inputEl.addEventListener('beforeinput', (event) => {
+  if (event && event.isComposing) {
+    suppressEnterOnce = true;
+  }
 });
 
 inputEl.addEventListener(
@@ -114,14 +123,8 @@ inputEl.addEventListener(
       return;
     }
 
-    const imeHint = composing || event.isComposing || event.keyCode === 229;
-    if (imeHint) {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      return;
-    }
-
-    if (suppressEnterOnce) {
+    const imeHint = isComposing || event.isComposing || event.keyCode === 229;
+    if (imeHint || suppressEnterOnce) {
       suppressEnterOnce = false;
       event.preventDefault();
       event.stopImmediatePropagation();
