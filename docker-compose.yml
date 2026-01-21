@@ -14,12 +14,12 @@ services:
       - LLM_ADAPTER_URL=${LLM_ADAPTER_URL}
       - ASPNETCORE_URLS=http://0.0.0.0:8080
     ports:
-      - "8080:8080"
+      - "2425:8080"
     volumes:
-      - ./data:/app/data
+      - /volume1/docker/talk-with-pucha/data:/app/data
     depends_on:
       - llm
-    restart: unless-stopped
+    restart: no
 
   llm:
     build:
@@ -34,4 +34,4 @@ services:
       - MAX_OUTPUT_TOKENS=${MAX_OUTPUT_TOKENS}
     expose:
       - "8000"
-    restart: unless-stopped
+    restart: no
