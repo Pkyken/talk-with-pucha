@@ -43,7 +43,13 @@ const resolveErrorMessage = (codeOrMessage, status) => {
   return errorMessages[codeOrMessage] || codeOrMessage || '不明なエラーです。';
 };
 
+const shouldBlockSend = () =>
+  isComposing || performance.now() - lastCompositionEndAt < 50;
+
 const sendMessage = async () => {
+  if (shouldBlockSend()) {
+    return;
+  }
   const text = inputEl.value.trim();
   if (!text) {
     return;
@@ -90,7 +96,7 @@ inputEl.addEventListener('compositionend', () => {
 });
 inputEl.addEventListener('keydown', (event) => {
   if (event.key === 'Enter' && !event.shiftKey) {
-    if (isComposing || event.isComposing || event.keyCode === 229) {
+    if (shouldBlockSend() || event.isComposing || event.keyCode === 229) {
       return;
     }
     if (ignoreNextEnter) {
