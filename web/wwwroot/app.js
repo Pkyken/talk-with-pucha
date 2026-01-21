@@ -6,7 +6,7 @@ const lockToggle = document.getElementById('lockToggle');
 const panicClear = document.getElementById('panicClear');
 const lockSession = document.getElementById('lockSession');
 let isComposing = false;
-let lastCompositionEndAt = 0;
+let ignoreNextEnter = false;
 
 const errorMessages = {
   unauthorized: '認証が必要です。',
@@ -92,11 +92,16 @@ inputEl.addEventListener('compositionstart', () => {
 });
 inputEl.addEventListener('compositionend', () => {
   isComposing = false;
-  lastCompositionEndAt = performance.now();
+  ignoreNextEnter = true;
 });
 inputEl.addEventListener('keydown', (event) => {
   if (event.key === 'Enter' && !event.shiftKey) {
     if (shouldBlockSend() || event.isComposing || event.keyCode === 229) {
+      return;
+    }
+    if (ignoreNextEnter) {
+      ignoreNextEnter = false;
+      event.preventDefault();
       return;
     }
     event.preventDefault();
