@@ -19,7 +19,7 @@ services:
       - /volume1/docker/talk-with-pucha/data:/app/data
     depends_on:
       - llm
-    restart: unless-stopped
+    restart: no
 
   llm:
     build:
@@ -34,4 +34,4 @@ services:
       - MAX_OUTPUT_TOKENS=${MAX_OUTPUT_TOKENS}
     expose:
       - "8000"
-    restart: unless-stopped
+    restart: no
