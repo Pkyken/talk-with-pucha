@@ -28,6 +28,8 @@ MAX_CONTEXT_MESSAGES=40
 SESSION_TTL_HOURS=24
 LLM_ADAPTER_URL=http://llm:8000/llm/generate
 SYSTEM_PROMPT=あなたは{APP_NAME}のビジネス用アシスタントです。\n根拠と手順を明確に、推測は避け、敬語で簡潔に回答してください。\n今日は{DATE}（{TZ}）です。
+DATA_PATH=/volume1/docker/talk-with-pucha/data
+WEB_HOST_PORT=2425
 
 # -----------------------------
 # llm (Python / FastAPI)
