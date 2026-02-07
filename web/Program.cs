@@ -17,6 +17,7 @@ var cooldownSeconds = GetRequiredIntEnv("COOLDOWN_SECONDS");
 var maxInputChars = GetRequiredIntEnv("MAX_INPUT_CHARS");
 var maxContextMessages = GetRequiredIntEnv("MAX_CONTEXT_MESSAGES");
 var llmAdapterUrl = GetRequiredEnv("LLM_ADAPTER_URL");
+var maxOutputTokens = GetRequiredIntEnv("MAX_OUTPUT_TOKENS");
 var sessionTtlHours = GetRequiredIntEnv("SESSION_TTL_HOURS");
 var systemPromptTemplate = Environment.GetEnvironmentVariable("SYSTEM_PROMPT");
 var tzName = Environment.GetEnvironmentVariable("TZ") ?? "UTC";
@@ -137,7 +138,7 @@ app.MapPost("/api/chat", async (HttpRequest request, HttpResponse response, Http
     var llmRequest = new LlmRequest
     {
         Messages = llmMessages,
-        MaxTokens = 600
+        MaxTokens = maxOutputTokens
     };
 
     HttpResponseMessage llmResponse;
